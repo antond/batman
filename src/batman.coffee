@@ -957,7 +957,7 @@ class BatmanObject extends Object
       @_batman.keyAccessors ||= new Batman.SimpleHash
       @_batman.keyAccessors.set(key, getAccessorObject(this, accessor)) for key in keys
 
-  # Support adding accessors to the prototype from within class defintions or after the class has been created
+  # Support adding accessors to the prototype from within class definitions or after the class has been created
   # with `KlassExtendingBatmanObject.accessor(keys..., accessorObject)`
   @accessor: -> @classAccessor.apply @prototype, arguments
   # Support adding accessors to instances after creation
