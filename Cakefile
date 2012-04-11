@@ -28,6 +28,10 @@ pipedExec = do ->
         running = false
         callback(code)
 
+unless require('coffee-script').VERSION == '1.3.0'
+  console.error "Please `npm update`, your packages are out of date."
+  process.exit 1
+
 task 'build', 'compile Batman.js and all the tools', (options) ->
   files = glob.sync('./src/**/*').concat(glob.sync('./tests/lib/*'))
   muffin.run
@@ -41,7 +45,7 @@ task 'build', 'compile Batman.js and all the tools', (options) ->
         source = muffin.readFile(matches[0], options).then (source) ->
           compiled = muffin.compileString(source, options)
           compiled = "#!/usr/bin/env node\n\n" + compiled
-          muffin.writeFile "tools/batman", compiled, muffin.extend({}, options, {mode: 0755})
+          muffin.writeFile "tools/batman", compiled, muffin.extend({}, options, {mode: 0o755})
       'src/tools/(.+)\.coffee'   : (matches) -> muffin.compileScript(matches[0], "tools/#{matches[1]}.js", options)
       'tests/run\.coffee'     : (matches) -> muffin.compileScript(matches[0], 'tests/run.js', options)
 
@@ -108,12 +112,13 @@ task 'doc', 'build the Percolate documentation', (options) ->
 task 'test', 'compile Batman.js and the tests and run them on the command line', (options) ->
   running = false
   muffin.run
-    files: glob.sync('./src/**/*.coffee').concat(glob.sync('./tests/**/*.coffee'))
+    files: glob.sync('./src/**/*.coffee').concat(glob.sync('./tests/**/*.coffee')).concat(glob.sync('./docs/**/*.coffee'))
     options: options
     map:
       'src/batman(.node)?.coffee'                : (matches) -> true
       'src/extras/(.+).coffee'                   : (matches) -> true
       'tests/batman/(.+)_(test|helper).coffee'   : (matches) -> true
+      'docs/percolate\.coffee'                   : (matches) -> muffin.compileScript(matches[0], 'docs/percolate.js', options)
       'tests/run.coffee'                         : (matches) -> muffin.compileScript(matches[0], 'tests/run.js', options)
     after: ->
       failFast = (code) ->
